@@ -1,5 +1,5 @@
-from project_name.base import NAME
+from unified_pipeline.base import NAME
 
 
 def test_base():
-    assert NAME == "project_name"
+    assert NAME == "unified_pipeline"
