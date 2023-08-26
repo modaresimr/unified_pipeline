@@ -1,25 +1,25 @@
-from datatool.dataset_abstract import Dataset
+from .dataset_abstract import Dataset
 import os
 import wget
 import pandas as pd
 from intervaltree.intervaltree import IntervalTree
 import json
-from general.utils import Data
+from unified_pipeline.common.data import Data
 import numpy as np
 
 
 class CASAS(Dataset):
-    def __init__(self, data_path, data_dscr):
-        super().__init__(data_path, data_dscr)
+    def __init__(self, datadir, title, **kwargs):
+        super().__init__(datadir, title)
 
     def _load(self):
         rootfolder = self.data_path
         # rootfolder='datasetfiles/CASAS/'+name+'/'
-        datafile = rootfolder+"/data.txt"
+        datafile = rootfolder + "/data.txt"
 
         all = pd.read_csv(datafile, sep=r"\s+", header=None,
                           names=["date", "time", "SID", "value", "activity", "hint"])
-        all.time = pd.to_datetime(all.date+" " + all.time,
+        all.time = pd.to_datetime(all.date + " " + all.time,
                                   format='%Y-%m-%d %H:%M:%S')
         all = all.drop(columns=['date'])
 
@@ -38,8 +38,8 @@ class CASAS(Dataset):
                 if not (e.activity in start):
                     continue
 
-                actevent = {"StartTime": start[e.activity].time,	"EndTime": e.time,
-                            "Activity": e.activity, 'Duration': e.time-start[e.activity].time}
+                actevent = {"StartTime": start[e.activity].time, "EndTime": e.time,
+                            "Activity": e.activity, 'Duration': e.time - start[e.activity].time}
                 # actevent=[start[splt[0]].time,e.time,splt[0]]
                 # start[splt[0]]=None
                 activity_events.append(actevent)
@@ -79,7 +79,7 @@ class CASAS(Dataset):
             except:
                 print(s)
                 from IPython.display import display
-                display(sensor_events.loc[sensor_events['SID']==s])
+                display(sensor_events.loc[sensor_events['SID'] == s])
                 raise
 
             sensor_desc.append(item)

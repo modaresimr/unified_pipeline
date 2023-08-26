@@ -11,9 +11,10 @@ import torch.nn.functional as F
 
 
 class SegPC2021Dataset(Dataset):
-    def __init__(self, dataset_dir=None, **kwargs):
+    def __init__(self, datadir, title, **kwargs):
         # pre-set variables
-        self.dataset_dir = dataset_dir
+        self.title = title
+        self.dataset_dir = datadir
         self.load_dataset()
 
     def load_dataset(self):
@@ -48,8 +49,11 @@ class SegPC2021Dataset(Dataset):
                     msk = msk[:, :, 0]
                 cim, nim = split_c_n(msk)
                 cim = np.where(cim > 0, yi + 1, 0)
-                nim = np.where(nim > 0, (yi + 1) * 1000, 0)
-                labels += cim + nim
+                nim = np.where(nim > 0, yi + 1, 0)
+
+                labels = np.zeros([*nim.shape, 2], dtype=np.uint8)
+                labels[:, :, 0] = cim
+                labels[:, :, 1] = nim
             Y.append(labels)
         self.X = np.array(X)
         self.Y = np.array(Y)
@@ -62,8 +66,8 @@ class SegPC2021Dataset(Dataset):
         img = self.X[idx]
         msk = self.Y[idx]
         meta = self.meta[idx]
-        
-        sample = {'image': img, 'mask': msk, 'id': idx,'meta': meta}
+
+        sample = {'image': img, 'mask': msk, 'id': meta}
         return sample
 
 

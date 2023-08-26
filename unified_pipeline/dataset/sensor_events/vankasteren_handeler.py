@@ -1,20 +1,20 @@
-from datatool.dataset_abstract import Dataset
+from .dataset_abstract import Dataset
 import os
 import wget
 import pandas as pd
 from intervaltree.intervaltree import IntervalTree
 import json
-from general.utils import Data
+from unified_pipeline.common.data import Data
 
 
 class VanKasteren(Dataset):
-    def __init__(self,data_path,data_dscr):
-        super().__init__(data_path,data_dscr);
-        
+    def __init__(self, datadir, title, **kwargs):
+        super().__init__(datadir, title)
+
     def _load(self):
         rootfolder = self.data_path
         sensefile = rootfolder + "sensedata.txt"
-        actfile = rootfolder   + "actdata.txt"
+        actfile = rootfolder + "actdata.txt"
 
         all = pd.read_csv(sensefile, '\t', None, header=0, names=[
             "StartTime", "EndTime", "SID", "value"])
@@ -32,20 +32,20 @@ class VanKasteren(Dataset):
             17: 'get drink'}
 
         sens = {
-            1:	'Microwave',
-            5:	'Hall-Toilet door',
-            6:	'Hall-Bathroom door',
-            7:	'Cups cupboard',
-            8:	'Fridge',
-            9:	'Plates cupboard',
-            12:	'Frontdoor',
-            13:	'Dishwasher',
-            14:	'ToiletFlush',
-            17:	'Freezer',
-            18:	'Pans Cupboard',
-            20:	'Washingmachine',
-            23:	'Groceries Cupboard',
-            24:	'Hall-Bedroom door'}
+            1: 'Microwave',
+            5: 'Hall-Toilet door',
+            6: 'Hall-Bathroom door',
+            7: 'Cups cupboard',
+            8: 'Fridge',
+            9: 'Plates cupboard',
+            12: 'Frontdoor',
+            13: 'Dishwasher',
+            14: 'ToiletFlush',
+            17: 'Freezer',
+            18: 'Pans Cupboard',
+            20: 'Washingmachine',
+            23: 'Groceries Cupboard',
+            24: 'Hall-Bedroom door'}
 
         sensor_events = pd.DataFrame(columns=["SID", "time", "value"])
         for i, s in all.iterrows():
@@ -55,12 +55,11 @@ class VanKasteren(Dataset):
         activity_events = pd.read_csv(actfile, '\t', None, header=0, names=["StartTime", "EndTime", "Activity"])
         activity_events.StartTime = pd.to_datetime(
             activity_events.StartTime, format='%d-%b-%Y %H:%M:%S')
-        activity_events.EndTime  = pd.to_datetime(activity_events.EndTime, format='%d-%b-%Y %H:%M:%S')
+        activity_events.EndTime = pd.to_datetime(activity_events.EndTime, format='%d-%b-%Y %H:%M:%S')
         activity_events.Activity = activity_events.Activity.apply(lambda x: acts[x])
         sensor_events = sensor_events.sort_values(['time'])
         activity_events = activity_events.sort_values(['StartTime', 'EndTime'])
         # print('finish downloading files')
-        
 
         activities = [acts[k] for k in acts]
 
