@@ -34,6 +34,7 @@ def displaycontent(dataset):
     activity_events['Duration'] = activity_events['Duration'].dt.seconds
     ax = activity_events.boxplot(by='Activity', column='Duration', figsize=(20, 10), grid=False)
     ax.set_yscale('symlog')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
 
 
 # loadA4HDataSet()
@@ -126,9 +127,11 @@ def sensor_hitmap(dataset):
     actscount = len(dataset.activities)
     import matplotlib.pyplot as plt
 
-    fig, subplots = plt.subplots((actscount - 1) // 4 + 1, 4, sharex=True, sharey=True, figsize=(20, 24))
+    fig, subplots = plt.subplots((actscount - 2) // 4 + 1, 4, sharex=True, sharey=True, figsize=(20, 2 * (actscount - 1)))
     subplots = subplots.reshape(-1)
     for i in dataset.activities_map:
+        if i == 0:
+            continue
         tmp_act_evants = dataset.activity_events.loc[dataset.activity_events['Activity'] == i]
 
         # print(dataset.activities_map[i])
@@ -152,8 +155,13 @@ def sensor_hitmap(dataset):
         tmp['hit time'] = (tmp['hit time'] * 4).round(0) / 4
         # fig = plt.figure(figsize=(20, 10))
         a = pd.pivot_table(tmp, columns='hit time', index='SID', aggfunc=np.count_nonzero, fill_value=0)
-        a = a / a.max()
+        # a = a / a.max()
         # plt.imshow(a, cmap='hot', interpolation='nearest')
-        ax = subplots[i]
-        sns.heatmap(a / a.max(), cmap=sns.cm.rocket_r, ax=ax)
+        ax = subplots[i - 1]
+        sns.heatmap(a, cmap=sns.cm.rocket_r, ax=ax, cbar_kws={"shrink": 0.5})
         ax.set_title(dataset.activities_map[i])
+        # if (i - 1) % 4 == 0:
+        #     ax.set_ylabel(ax.get_yticklabels(), rotation=0)
+
+    for x in range(i, len(subplots)):
+        subplots[x].remove()
